@@ -47,17 +47,6 @@ public class JavaBehaviorPacks implements ModInitializer {
 							
 							JSONObject object = new JSONObject(s);
 							
-//							JsonObject<JsonObject<?>> itemJSON = new JsonObject<>();
-//							itemJSON.queueOrCreate("\"format_version\"");
-//							itemJSON.queueOrCreate("\"1.16.0\"");
-//							itemJSON.queueOrCreate("\"minecraft:item\"");
-//							itemJSON.queueOrCreate("{\t\"description\": {\t\t\"identifier\": \"foodstuffs:honey_melon\"\t},\t\"components\": {\t\t\"minecraft:use_duration\": 32,\t\t\"minecraft:food\": {\t\t\t\"nutrition\": 3,\t\t\t\"saturation_modifier\": \"good\"\t\t},\t\t\"minecraft:max_stack_size\": 64,\t\t\"minecraft:hand_equipped\": false,\t\t\"minecraft:stacked_by_data\": true,\t\t\"minecraft:foil\": false\t}}".replace("\t","").replace("\n",""));
-//
-//							System.out.println(itemJSON);
-							
-//							String id = s.substring(s.indexOf("\"identifier\":")).substring("\"identifier\":".length()).trim();
-//							id = id.substring(1,id.indexOf("\""));
-							
 							int maxStack = 64;
 							int useTime = 0;
 							
