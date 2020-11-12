@@ -66,10 +66,16 @@ public class JavaBehaviorPacks implements ModInitializer {
 									JSONObject foodDescription = components.getJSONObject("minecraft:food");
 									food = new FoodComponent.Builder();
 									if (foodDescription.has("nutrition")) {
-										food.hunger(foodDescription.getInt("nutrition"));
+										food = food.hunger(foodDescription.getInt("nutrition"));
 									}
 									if (foodDescription.has("saturation_modifier")) {
-										food.saturationModifier(0);
+										//TODO
+										food = food.saturationModifier(0);
+									}
+									if (foodDescription.has("can_always_eat")) {
+										if (foodDescription.getBoolean("can_always_eat")) {
+											food = food.alwaysEdible();
+										}
 									}
 								}
 							}
