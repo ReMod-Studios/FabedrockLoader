@@ -1,7 +1,9 @@
 package com.tfc.javabehaviorpacks.registry_handlers;
 
+import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.json.JSONObject;
 
@@ -79,6 +81,9 @@ public class Item {
 			if (food != null) {
 				settings = settings.food(food.build());
 			}
+			
+			if (!JavaBehaviorPacks.namespaces.contains(new Identifier(id).getNamespace()))
+				JavaBehaviorPacks.namespaces.add(new Identifier(id).getNamespace());
 			
 			final int finalUseTime = useTime;
 			Registry.register(Registry.ITEM, id, new net.minecraft.item.Item(settings) {

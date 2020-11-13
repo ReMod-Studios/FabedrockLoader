@@ -1,8 +1,10 @@
 package com.tfc.javabehaviorpacks.client;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.resource.ResourcePack;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.resource.metadata.ResourceMetadataReader;
@@ -17,9 +19,12 @@ import java.util.function.Predicate;
 
 //TODO
 public class BedrockResourcePackAdapter implements ResourcePack {
+	private static InputStream icon;
+	
 	@Override
 	public InputStream openRoot(String fileName) throws IOException {
-		return null;
+		icon = BedrockResourcePackAdapter.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/bedrock.png");
+		return icon;
 	}
 	
 	@Override
@@ -29,7 +34,7 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 	
 	@Override
 	public Collection<Identifier> findResources(ResourceType type, String namespace, String prefix, int maxDepth, Predicate<String> pathFilter) {
-		return null;
+		return ImmutableList.of();
 	}
 	
 	@Override
@@ -39,12 +44,13 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 	
 	@Override
 	public Set<String> getNamespaces(ResourceType type) {
-		return ImmutableSet.of();
+		return ImmutableSet.copyOf(JavaBehaviorPacks.namespaces.toArray(new String[0]));
 	}
 	
 	@Override
 	public <T> @Nullable T parseMetadata(ResourceMetadataReader<T> metaReader) throws IOException {
 		return metaReader.fromJson(
+				//Using Gson here because it's required
 				new GsonBuilder().setLenient().setPrettyPrinting().create().fromJson("" +
 						"{\n" +
 						"\"pack_format\": 6,\n" +
@@ -60,6 +66,9 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 	
 	@Override
 	public void close() {
-	
+		try {
+			icon.close();
+		} catch (Throwable ignored) {
+		}
 	}
 }

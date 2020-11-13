@@ -1,10 +1,9 @@
 package com.tfc.javabehaviorpacks.registry_handlers;
 
+import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Material;
-import net.minecraft.block.MaterialColor;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.json.JSONObject;
 
@@ -55,6 +54,9 @@ public class Block {
 			String id = blockObj.getJSONObject("description").getString("identifier");
 			
 			System.out.println(id);
+			
+			if (!JavaBehaviorPacks.namespaces.contains(new Identifier(id).getNamespace()))
+				JavaBehaviorPacks.namespaces.add(new Identifier(id).getNamespace());
 			
 			AbstractBlock.Settings settings = AbstractBlock.Settings.of(Material.STONE);
 			
