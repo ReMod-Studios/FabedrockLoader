@@ -1,11 +1,12 @@
 package com.tfc.javabehaviorpacks.registry_handlers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Material;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Scanner;
@@ -38,20 +39,22 @@ public class Block {
 //									.get("\"identifier\"").getHeld()
 //							);
 			
-			JSONObject object = new JSONObject(s.toString());
+			Gson gson = new Gson();
 			
-			JSONObject blockObj = object.getJSONObject("minecraft:block");
+			JsonObject object = gson.fromJson(s.toString(), JsonObject.class);
+			
+			JsonObject blockObj = object.getAsJsonObject("minecraft:block");
 			
 			String color = "#0";
 			
 			if (blockObj.has("components")) {
-				JSONObject components = blockObj.getJSONObject("components");
+				JsonObject components = blockObj.getAsJsonObject("components");
 				if (components.has("minecraft:map_color")) {
-					color = components.getString("minecraft:map_color");
+					color = components.getAsJsonPrimitive("minecraft:map_color").getAsString();
 				}
 			}
 			
-			String id = blockObj.getJSONObject("description").getString("identifier");
+			String id = blockObj.getAsJsonObject("description").getAsJsonPrimitive("identifier").getAsString();
 			
 			System.out.println(id);
 			

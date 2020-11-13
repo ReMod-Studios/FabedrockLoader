@@ -1,11 +1,12 @@
 package com.tfc.javabehaviorpacks.registry_handlers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Scanner;
@@ -37,42 +38,44 @@ public class Item {
 //									.get("\"identifier\"").getHeld()
 //							);
 			
-			JSONObject object = new JSONObject(s.toString());
+			Gson gson = new Gson();
+			
+			JsonObject object = gson.fromJson(s.toString(), JsonObject.class);
 			
 			int maxStack = 64;
 			int useTime = 0;
 			
 			FoodComponent.Builder food = null;
 			
-			JSONObject itemObj = object.getJSONObject("minecraft:item");
+			JsonObject itemObj = object.getAsJsonObject("minecraft:item");
 			
 			if (itemObj.has("components")) {
-				JSONObject components = itemObj.getJSONObject("components");
+				JsonObject components = itemObj.getAsJsonObject("components");
 				if (components.has("minecraft:max_stack_size")) {
-					maxStack = components.getInt("minecraft:max_stack_size");
+					maxStack = components.getAsJsonPrimitive("minecraft:max_stack_size").getAsInt();
 				}
 				if (components.has("minecraft:use_duration")) {
-					useTime = components.getInt("minecraft:use_duration");
+					useTime = components.getAsJsonPrimitive("minecraft:use_duration").getAsInt();
 				}
 				if (components.has("minecraft:food")) {
-					JSONObject foodDescription = components.getJSONObject("minecraft:food");
+					JsonObject foodDescription = components.getAsJsonObject("minecraft:food");
 					food = new FoodComponent.Builder();
 					if (foodDescription.has("nutrition")) {
-						food = food.hunger(foodDescription.getInt("nutrition"));
+						food = food.hunger(foodDescription.getAsJsonPrimitive("nutrition").getAsInt());
 					}
 					if (foodDescription.has("saturation_modifier")) {
 						//TODO
 						food = food.saturationModifier(0);
 					}
 					if (foodDescription.has("can_always_eat")) {
-						if (foodDescription.getBoolean("can_always_eat")) {
+						if (foodDescription.getAsJsonPrimitive("can_always_eat").getAsBoolean()) {
 							food = food.alwaysEdible();
 						}
 					}
 				}
 			}
 			
-			String id = itemObj.getJSONObject("description").getString("identifier");
+			String id = itemObj.getAsJsonObject("description").getAsJsonPrimitive("identifier").getAsString();
 			
 			System.out.println(id);
 			

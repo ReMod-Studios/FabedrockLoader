@@ -6,6 +6,10 @@ plugins {
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+//configurations {
+//    extraLibs
+//}
+
 archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
@@ -20,7 +24,8 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // https://mvnrepository.com/artifact/org.json/json
-    compile group: 'org.json', name: 'json', version: '20200518'
+//    compile group: 'org.json', name: 'json', version: '20200518'
+//    configurations.compile.extendsFrom(configurations.extraLibs)
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
@@ -78,3 +83,12 @@ publishing {
         // mavenLocal()
     }
 }
+
+//jar {
+////    manifest {
+////        attributes 'Main-Class': 'com.github.lorenzopapi.FlameInstaller'
+////    }
+//    from {
+//        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+//    }
+//}
