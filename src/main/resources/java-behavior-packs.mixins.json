@@ -6,7 +6,8 @@
   "mixins": [
   ],
   "client": [
-    "client.JoinWorldMixin"
+    "client.JoinWorldMixin",
+    "client.ResourcePackManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
