@@ -1,11 +1,12 @@
 {
-  "required": true,
+  "required": false,
   "minVersion": "0.8",
-  "package": "com.tfc.javabehaviorpacks.mixin",
+  "package": "com.tfc.javabehaviorpacks.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
   ],
   "client": [
+    "client.JoinWorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1

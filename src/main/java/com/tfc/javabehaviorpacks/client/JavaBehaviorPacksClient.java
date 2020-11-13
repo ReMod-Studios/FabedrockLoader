@@ -8,6 +8,5 @@ import net.fabricmc.api.Environment;
 public class JavaBehaviorPacksClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
-	
 	}
 }
