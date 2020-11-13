@@ -6,6 +6,7 @@ import net.fabricmc.api.ModInitializer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class JavaBehaviorPacks implements ModInitializer {
 	public static ArrayList<String> namespaces = new ArrayList<>();
@@ -18,20 +19,47 @@ public class JavaBehaviorPacks implements ModInitializer {
 		}
 		try {
 			for (File pack : bevPacks.listFiles()) {
-				for (File resource : pack.listFiles()) {
-					if (resource.getName().equals("items")) {
-						for (File item : resource.listFiles()) {
-							Item.register(item);
-						}
+				boolean isServerSide = false;
+				try {
+					File manifest = new File(pack + "/manifest.json");
+					Scanner sc = new Scanner(manifest);
+					while (sc.hasNextLine()) {
+						isServerSide = sc.nextLine().contains("data");
+						if (isServerSide) break;
 					}
-					if (resource.getName().equals("blocks")) {
-						for (File item : resource.listFiles()) {
-							Block.register(item);
+					sc.close();
+				} catch (Throwable ignored) {
+				}
+				if (isServerSide) {
+					for (File resource : pack.listFiles()) {
+						if (resource.getName().equals("items")) {
+							ArrayList<File> allItems = new ArrayList<>();
+							getAllFiles(resource, allItems);
+							for (File item : allItems) {
+								Item.register(item);
+							}
+						}
+						if (resource.getName().equals("blocks")) {
+							ArrayList<File> allBlocks = new ArrayList<>();
+							getAllFiles(resource, allBlocks);
+							for (File item : allBlocks) {
+								Block.register(item);
+							}
 						}
 					}
 				}
 			}
 		} catch (Throwable ignored) {
+		}
+	}
+	
+	public void getAllFiles(File f, ArrayList<File> list) {
+		for (File f1 : f.listFiles()) {
+			if (f1.isDirectory()) {
+				getAllFiles(f1, list);
+			} else {
+				list.add(f1);
+			}
 		}
 	}
 }

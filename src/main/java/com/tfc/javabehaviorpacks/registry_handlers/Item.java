@@ -2,6 +2,7 @@ package com.tfc.javabehaviorpacks.registry_handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.tfc.javabehaviorpacks.EnumFoodQuality;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
@@ -9,8 +10,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.Scanner;
 
+//https://bedrock.dev/docs/stable/Item
 public class Item {
 	public static void register(File item) {
 		try {
@@ -64,8 +67,9 @@ public class Item {
 						food = food.hunger(foodDescription.getAsJsonPrimitive("nutrition").getAsInt());
 					}
 					if (foodDescription.has("saturation_modifier")) {
-						//TODO
-						food = food.saturationModifier(0);
+						food = food.saturationModifier(Objects.requireNonNull(EnumFoodQuality.forName(
+								foodDescription.getAsJsonPrimitive("saturation_modifier").getAsString()
+						)).getVal());
 					}
 					if (foodDescription.has("can_always_eat")) {
 						if (foodDescription.getAsJsonPrimitive("can_always_eat").getAsBoolean()) {
