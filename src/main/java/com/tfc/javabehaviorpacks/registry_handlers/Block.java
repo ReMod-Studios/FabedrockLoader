@@ -26,7 +26,7 @@ public class Block {
 			
 			while (sc.hasNextLine()) {
 				String line = sc.nextLine();
-				//Curse you too bridge, lol
+				//Curse you too bridge., lol
 				if (!line.startsWith("//")) {
 					s.append(line.trim());
 				}
