@@ -1,4 +1,5 @@
 itemGroup.bedrock_tabs.nature_tab=Bedrock Nature
-itemGroup.bedrock_tabs.equipment_tab=Bedrock Equipment
-itemGroup.java_behvaiorpacks.bedrock_items=Bedrock Items
-itemGroup.java_behvaiorpacks.bedrock_blocks=Bedrock Blocks
+itemGroup.bedrock_tabs.equipment=Bedrock Equipment
+itemGroup.bedrock_tabs.items_tab=Bedrock Items
+itemGroup.java_behaviorpacks.bedrock_items=Bedrock Items
+itemGroup.java_behaviorpacks.bedrock_blocks=Bedrock Blocks

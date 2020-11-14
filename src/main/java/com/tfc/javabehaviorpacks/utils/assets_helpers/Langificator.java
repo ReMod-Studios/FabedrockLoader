@@ -45,5 +45,6 @@ public class Langificator {
 		langFile.append("\t\"\":\"\"\n" + "}");
 		
 		return langFile.toString();
+//		return langFile.toString().replace("\r","").replace("\n\",","\",");
 	}
 }
