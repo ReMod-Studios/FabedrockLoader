@@ -2,12 +2,17 @@ package com.tfc.javabehaviorpacks.registry_handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.tfc.javabehaviorpacks.CreativeTabCache;
 import com.tfc.javabehaviorpacks.EnumFoodQuality;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
+import com.tfc.javabehaviorpacks.utils.assets_helpers.NoValidationIdentifier;
 import net.minecraft.item.FoodComponent;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 
 import java.io.File;
 import java.util.Objects;
@@ -47,6 +52,7 @@ public class Item {
 			
 			int maxStack = 64;
 			int useTime = 0;
+			boolean enchantmentGlint = false;
 			
 			FoodComponent.Builder food = null;
 			
@@ -60,6 +66,9 @@ public class Item {
 				if (components.has("minecraft:use_duration")) {
 					useTime = components.getAsJsonPrimitive("minecraft:use_duration").getAsInt();
 				}
+				if (components.has("minecraft:foil")) {
+					enchantmentGlint = components.getAsJsonPrimitive("minecraft:foil").getAsBoolean();
+				}
 				if (components.has("minecraft:food")) {
 					JsonObject foodDescription = components.getAsJsonObject("minecraft:food");
 					food = new FoodComponent.Builder();
@@ -67,9 +76,12 @@ public class Item {
 						food = food.hunger(foodDescription.getAsJsonPrimitive("nutrition").getAsInt());
 					}
 					if (foodDescription.has("saturation_modifier")) {
-						food = food.saturationModifier(Objects.requireNonNull(EnumFoodQuality.forName(
-								foodDescription.getAsJsonPrimitive("saturation_modifier").getAsString()
-						)).getVal());
+						try {
+							food = food.saturationModifier(Objects.requireNonNull(EnumFoodQuality.forName(
+									foodDescription.getAsJsonPrimitive("saturation_modifier").getAsString()
+							)).getVal());
+						} catch (Throwable ignored) {
+						}
 					}
 					if (foodDescription.has("can_always_eat")) {
 						if (foodDescription.getAsJsonPrimitive("can_always_eat").getAsBoolean()) {
@@ -89,16 +101,71 @@ public class Item {
 				settings = settings.food(food.build());
 			}
 			
-			if (!JavaBehaviorPacks.namespaces.contains(new Identifier(id).getNamespace()))
-				JavaBehaviorPacks.namespaces.add(new Identifier(id).getNamespace());
+			id = id.toLowerCase();
+			
+			if (!JavaBehaviorPacks.namespaces.contains(new NoValidationIdentifier(id).getNamespace()))
+				JavaBehaviorPacks.namespaces.add(new NoValidationIdentifier(id).getNamespace());
 			
 			final int finalUseTime = useTime;
-			Registry.register(Registry.ITEM, id, new net.minecraft.item.Item(settings) {
+			boolean finalEnchantmentGlint = enchantmentGlint;
+			net.minecraft.item.Item item1 = new net.minecraft.item.Item(settings.group(CreativeTabCache.bedrockItems)) {
 				@Override
 				public int getMaxUseTime(ItemStack stack) {
 					return finalUseTime;
 				}
-			});
+				
+				@Override
+				public boolean hasGlint(ItemStack stack) {
+					return finalEnchantmentGlint || super.hasGlint(stack);
+				}
+				
+				@Override
+				protected boolean isIn(ItemGroup group) {
+					if (CreativeTabCache.getGroupsFor(new ItemStack(this)).contains(group)) return true;
+					return super.isIn(group);
+				}
+				
+				@Override
+				public void appendStacks(ItemGroup group, DefaultedList<ItemStack> stacks) {
+					super.appendStacks(group, stacks);
+//					if (CreativeTabCache.getGroupsFor(new ItemStack(this)).contains(group)) {
+//						stacks.add(new ItemStack(this));
+//					}
+				}
+			};
+			if (Registry.ITEM.containsId(new NoValidationIdentifier(id))) {
+				try {
+					Registry.register(Registry.ITEM, id, item1);
+				} catch (Throwable ignored) {
+					Registry.ITEM.set(
+							Registry.ITEM.getRawId(
+									Registry.ITEM.get(
+											new Identifier(id)
+									)
+							),
+							RegistryKey.of(
+									Registry.ITEM.getKey(),
+									new Identifier(id)
+							),
+							item1,
+							com.mojang.serialization.Lifecycle.stable()
+					);
+				}
+			} else {
+				Registry.ITEM.set(
+						Registry.ITEM.getRawId(
+								Registry.ITEM.get(
+										new Identifier(id)
+								)
+						),
+						RegistryKey.of(
+								Registry.ITEM.getKey(),
+								new Identifier(id)
+						),
+						item1,
+						com.mojang.serialization.Lifecycle.stable()
+				);
+			}
 		} catch (Throwable ignored) {
 			ignored.printStackTrace();
 		}

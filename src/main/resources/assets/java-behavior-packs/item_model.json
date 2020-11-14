@@ -1,0 +1,6 @@
+{
+  "parent": "item/%render_offsets%",
+  "textures": {
+    "layer0": "%texture%"
+  }
+}

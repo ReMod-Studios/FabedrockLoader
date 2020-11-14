@@ -5,14 +5,11 @@ import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.CreativeTabCache;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
 import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.BlockView;
 
 import java.io.File;
 import java.util.Scanner;
@@ -57,10 +54,15 @@ public class Block {
 			float destroy_time = 0;
 			float explosion_resistance = 0;
 			
+			boolean isSolid = false;
+			
 			if (blockObj.has("components")) {
 				JsonObject components = blockObj.getAsJsonObject("components");
-				if (components.has("minecraft:map_color")) {
-					color = components.getAsJsonPrimitive("minecraft:map_color").getAsString();
+				try {
+					if (components.has("minecraft:map_color")) {
+						color = components.getAsJsonPrimitive("minecraft:map_color").getAsString();
+					}
+				} catch (Throwable ignored) {
 				}
 				if (components.has("minecraft:destroy_time")) {
 					destroy_time = components.getAsJsonPrimitive("minecraft:destroy_time").getAsInt();
@@ -68,25 +70,22 @@ public class Block {
 				if (components.has("minecraft:explosion_resistance")) {
 					explosion_resistance = components.getAsJsonPrimitive("minecraft:explosion_resistance").getAsInt();
 				}
+				if (components.has("minecraft:breathability")) {
+					isSolid = components.getAsJsonPrimitive("minecraft:breathability").getAsString().equals("solid");
+				}
 			}
 			
 			String id = blockObj.getAsJsonObject("description").getAsJsonPrimitive("identifier").getAsString();
 			
 			System.out.println(id);
 			
-			
 			if (!JavaBehaviorPacks.namespaces.contains(new Identifier(id).getNamespace()))
 				JavaBehaviorPacks.namespaces.add(new Identifier(id).getNamespace());
 			
-			
+			boolean finalIsSolid = isSolid;
 			AbstractBlock.Settings settings = AbstractBlock.Settings.of(Material.STONE)
 					.strength(destroy_time, explosion_resistance)
-					.suffocates(new AbstractBlock.ContextPredicate() {
-						@Override
-						public boolean test(BlockState state, BlockView world, BlockPos pos) {
-							return false;
-						}
-					});
+					.suffocates((state, world, pos) -> finalIsSolid);
 			
 			net.minecraft.block.Block bk = Registry.register(Registry.BLOCK, id, new net.minecraft.block.Block(settings));
 			Registry.register(Registry.ITEM, id, new BlockItem(bk, new Item.Settings().group(CreativeTabCache.bedrockBlocks)));
