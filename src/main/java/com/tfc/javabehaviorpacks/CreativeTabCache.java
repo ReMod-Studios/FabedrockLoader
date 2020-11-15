@@ -1,7 +1,14 @@
-package com.tfc.javabehaviorpacks;
+ m) {
+		 wait do blocks not exist client side in bedrockackage com.tfc.javabehaviorpacks;
+matodo; do 	v
+
+
+}
+
+
 
 import com.tfc.javabehaviorpacks.utils.BiProvider;
-import com.tfc.javabehaviorpacks.utils.assets_helpers.ParentMapper;
+WorldMnimport com.tfc.javabehaviorpacks.utils.assets_helpers.BedrockMapper;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
@@ -15,6 +22,7 @@ import java.util.HashMap;
 
 public class CreativeTabCache {
 	public static final ItemGroup bedrockBlocks = FabricItemGroupBuilder.create(new Identifier("java_behaviorpacks:bedrock_blocks")).icon(() -> new ItemStack(Items.GRASS_BLOCK)).build();
+
 	public static final ItemGroup bedrockItems = FabricItemGroupBuilder.create(new Identifier("java_behaviorpacks:bedrock_items")).icon(() -> new ItemStack(Items.BLAZE_POWDER)).build();
 	
 	private static final HashMap<String, BiProvider<FabricItemGroupBuilder, ArrayList<String>>> groupHashMap = new HashMap<>();
@@ -30,10 +38,10 @@ public class CreativeTabCache {
 				if (translationKey.equals("items_tab") || translationKey.equals("blocks_tab")) {
 					return;
 				} else {
-					groupHashMap.put(
+					groupHashMap.put
+							(
 							translationKey,
-							BiProvider.of(
-									FabricItemGroupBuilder.create(new Identifier(
+							BiProvider.									FabricItemGroupBuilder.create(new Identifier(
 											"bedrock_tabs",
 											translationKey
 									)).icon(() -> new ItemStack(Items.BEDROCK)),
@@ -47,9 +55,10 @@ public class CreativeTabCache {
 			err.printStackTrace();
 		}
 	}
+
 	
 	public static void initTabs() {
-		groupHashMap.forEach((name, group) -> {
+		((name, group) -> {
 					builtGroupHashMap.put(
 							group.getT()
 //									.appendItems((list) -> {
@@ -64,8 +73,8 @@ public class CreativeTabCache {
 		);
 	}
 	
-	public static ArrayList<ItemGroup> getGroupsFor(ItemStack stack) {
-		Identifier id = Registry.ITEM.getId(stack.getItem());
+	
+	public static ArrayList<ItemGroup> getGroupsFor(ItemStack stack) 	Identifier id = Registry.ITEM.getId(stack.getItem());
 		ArrayList<ItemGroup> groups = new ArrayList<>();
 		
 		if (stack.getItem() instanceof BlockItem) groups.add(bedrockBlocks);
@@ -77,7 +86,7 @@ public class CreativeTabCache {
 						groups.add(tab);
 					}
 				}
-		);
-		return groups;
-	}
+				
+				
+
 }

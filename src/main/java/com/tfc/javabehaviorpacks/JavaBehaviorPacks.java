@@ -9,8 +9,9 @@ import com.tfc.javabehaviorpacks.utils.BiProvider;
 import com.tfc.javabehaviorpacks.utils.PropertiesReader;
 import com.tfc.javabehaviorpacks.utils.assets_helpers.Langificator;
 import com.tfc.javabehaviorpacks.utils.assets_helpers.NoValidationIdentifier;
-import com.tfc.javabehaviorpacks.utils.assets_helpers.ParentMapper;
+import com.tfc.javabehaviorpacks.utils.assets_helpers.BedrockMapper;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.server.MinecraftServer;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -22,6 +23,10 @@ public class JavaBehaviorPacks implements ModInitializer {
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientItemJsons = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientLangs = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, File>> clientTextures = new ArrayList<>();
+	
+	public static ArrayList<BiProvider<String, File>> serverMcFuncs = new ArrayList<>();
+	
+	public static MinecraftServer server;
 	
 	static {
 		try {
@@ -37,6 +42,13 @@ public class JavaBehaviorPacks implements ModInitializer {
 		byte[] bytes = new byte[stream.available()];
 		stream.read(bytes);
 		return new String(bytes);
+	}
+	
+	public static String readFile(File file) throws IOException {
+		FileInputStream stream = new FileInputStream(file);
+		String output = readStream(stream);
+		stream.close();
+		return output;
 	}
 	
 	public void getAllFiles(File f, ArrayList<File> list) {
@@ -62,6 +74,21 @@ public class JavaBehaviorPacks implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
+//		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+//			dispatcher.register(
+//					CommandManager.literal("function_bedrock").executes(
+//							context ->
+//									McFunctionExecutor.execute(
+//											context.getInput()
+////										.substring("execute_bedrock".length())
+//													.replace("$", "")
+//									)
+//					)
+//			);
+//		});
+		
+		CommandUpdater.main(new String[0]);
+		
 		File bevPacks = new File("behavior_packs");
 		if (!bevPacks.exists()) {
 			bevPacks.mkdirs();
@@ -147,6 +174,15 @@ public class JavaBehaviorPacks implements ModInitializer {
 							getAllFiles(resource, allBlocks);
 							for (File item : allBlocks) {
 								Block.register(item);
+							}
+						}
+						if (resource.getName().equals("functions")) {
+							ArrayList<File> allFuncs = new ArrayList<>();
+							getAllFiles(resource, allFuncs);
+							for (File item : allFuncs) {
+								if (item.getName().endsWith(".mcfunction")) {
+									serverMcFuncs.add(BiProvider.of(item.getPath().substring(pack.getPath().length()),item));
+								}
 							}
 						}
 						if (resource.getName().equals("jbp-client")) {
@@ -287,7 +323,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 							"%texture%", texture1.replace("textures/", "").toLowerCase()
 					).replace(
 							"%render_offsets%",
-							ParentMapper.getMappedForItem(renderOffsets)
+							BedrockMapper.getMappedForItem(renderOffsets)
 					);
 					
 					File f = new File(
