@@ -1,7 +1,7 @@
 package com.tfc.javabehaviorpacks;
 
 import com.tfc.javabehaviorpacks.utils.BiProvider;
-import com.tfc.javabehaviorpacks.utils.assets_helpers.ParentMapper;
+import com.tfc.javabehaviorpacks.utils.assets_helpers.BedrockMapper;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
@@ -29,18 +29,18 @@ public class CreativeTabCache {
 					return;
 				} else {
 					groupHashMap.put(
-							ParentMapper.getMappedForTab(translationKey),
+							BedrockMapper.getMappedForTab(translationKey),
 							BiProvider.of(
 									FabricItemGroupBuilder.create(new Identifier(
 											"bedrock_tabs",
-											ParentMapper.getMappedForTab(translationKey)
+											BedrockMapper.getMappedForTab(translationKey)
 									)).icon(() -> new ItemStack(Items.BEDROCK)),
 									new ArrayList<>())
 					);
 				}
 			}
 			
-			groupHashMap.get(ParentMapper.getMappedForTab(translationKey)).getV().add(id);
+			groupHashMap.get(BedrockMapper.getMappedForTab(translationKey)).getV().add(id);
 		} catch (Throwable err) {
 			err.printStackTrace();
 		}
