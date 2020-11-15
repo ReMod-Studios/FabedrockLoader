@@ -2,6 +2,7 @@ package com.tfc.javabehaviorpacks;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.registry_handlers.Block;
 import com.tfc.javabehaviorpacks.registry_handlers.Item;
@@ -20,7 +21,12 @@ import java.util.Scanner;
 public class JavaBehaviorPacks implements ModInitializer {
 	public static ArrayList<String> namespaces = new ArrayList<>();
 	private static final String templateItemJson;
+	private static final String templateBlockCubeAll;
+	private static final String templateCubeTBS;
+	private static final String genericBlockState;
+	private static final String blockItemModel;
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientItemJsons = new ArrayList<>();
+	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientBlockJsons = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientLangs = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, File>> clientTextures = new ArrayList<>();
 	
@@ -31,7 +37,28 @@ public class JavaBehaviorPacks implements ModInitializer {
 	static {
 		try {
 			InputStream stream = JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/item_model.json");
+			assert stream != null;
 			templateItemJson = readStream(stream);
+			stream.close();
+			
+			stream = JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/block_models/cube_all.json");
+			assert stream != null;
+			templateBlockCubeAll = readStream(stream);
+			stream.close();
+			
+			stream = JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/block_models/cube_tbs.json");
+			assert stream != null;
+			templateCubeTBS = readStream(stream);
+			stream.close();
+			
+			stream = JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/block_models/generic_state.json");
+			assert stream != null;
+			genericBlockState = readStream(stream);
+			stream.close();
+			
+			stream = JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/block_models/block_item.json");
+			assert stream != null;
+			blockItemModel = readStream(stream);
 			stream.close();
 		} catch (Throwable err) {
 			throw new RuntimeException(err);
@@ -114,7 +141,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 		
 		try {
 			String lang = Langificator.toJson(
-					JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/en_US.lang")
+					JavaBehaviorPacks.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/builtin/en_US.lang")
 			);
 			clientLangs.add(BiProvider.of(new NoValidationIdentifier(
 							"behaviorpack_base" + packDiscriminatorText, "lang/" + "en_US.lang".toLowerCase().replace(".lang", ".json")
@@ -327,7 +354,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 					);
 					
 					File f = new File(
-							"bedrock_resource_pack/assets/" + identifier.getNamespace() + "/" +
+							"bedrock_resource_pack/assets/" +
 									identifier.toString().replace(":", "/")
 					);
 					
@@ -341,9 +368,9 @@ public class JavaBehaviorPacks implements ModInitializer {
 									newJson
 							)
 					);
-					
+
 					File file = new File(pack.toString() + "/" + new NoValidationIdentifier(texture1).getPath() + ".png");
-					
+
 					clientTextures.add(
 							BiProvider.of(
 									new NoValidationIdentifier(
@@ -352,20 +379,186 @@ public class JavaBehaviorPacks implements ModInitializer {
 									file
 							)
 					);
-					
+
 					f = new File(
-							"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+							"bedrock_resource_pack/assets/" +
 									"/" + texture1.replace(":", "/") + ".png"
 					);
-					
+
 					if (outputPack) {
 						if (!f.exists()) {
 							f.getParentFile().mkdirs();
 							f.createNewFile();
 						}
-						
+
 						Files.copy(file, f);
 					}
+				}
+			} else if (resource.getName().endsWith("blocks.json")) {
+				try {
+					InputStream terrain = new FileInputStream(new File(pack+"/textures/terrain_texture.json"));
+					JsonObject blockTextureMap = gson.fromJson(readStream(terrain),JsonObject.class).getAsJsonObject("texture_data");
+					terrain.close();
+					
+					FileInputStream stream1 = new FileInputStream(resource);
+					JsonObject blocks = gson.fromJson(readStream(stream1), JsonObject.class);
+					stream1.close();
+					
+					blocks.entrySet().forEach(entry -> {
+						try {
+							if (!entry.getKey().equals("format_version")) {
+								NoValidationIdentifier identifier = new NoValidationIdentifier(entry.getKey());
+								JsonElement textures;
+								
+								try {
+									textures = entry.getValue().getAsJsonObject().getAsJsonPrimitive("textures");
+								} catch (Throwable ignored) {
+									textures = entry.getValue().getAsJsonObject().getAsJsonObject("textures");
+								}
+								
+								ArrayList<String> allTextures = new ArrayList<>();
+								String model = "";
+								
+								if (textures != null) {
+									if (textures.isJsonPrimitive()) {
+										System.out.println(textures.getAsString());
+										String tex = blockTextureMap
+												.getAsJsonObject(textures.getAsJsonPrimitive().getAsString())
+												.getAsJsonArray("textures")
+												.get(0)
+												.getAsString()
+												.replace("textures/","");
+										model = templateBlockCubeAll.replace("%texture%", identifier.getNamespace()+":"+tex.toLowerCase());
+										allTextures.add(tex);
+									} else {
+										JsonObject textureObject = (JsonObject)textures;
+										if (
+												textureObject.has("up") &&
+														textureObject.has("down") &&
+														textureObject.has("side")
+										) {
+											model = templateCubeTBS;
+											BiProvider<String, String>[] texturesArray = new BiProvider[]{
+													BiProvider.of("up", textureObject.getAsJsonPrimitive("up").getAsString()),
+													BiProvider.of("down", textureObject.getAsJsonPrimitive("down").getAsString()),
+													BiProvider.of("side", textureObject.getAsJsonPrimitive("side").getAsString())
+											};
+											for (BiProvider<String, String> s : texturesArray) {
+												System.out.println(s.getT());
+												System.out.println(s.getV());
+												String tex = blockTextureMap
+														.getAsJsonObject(s.getV())
+														.getAsJsonArray("textures")
+														.get(0)
+														.getAsString()
+														.replace("textures/","");
+												model = model.replace("%" + s.getT() + "%", identifier.getNamespace() + ":" + tex.toLowerCase());
+												allTextures.add(tex);
+											}
+											System.out.println(model);
+										}
+									}
+								}
+								
+								if (!model.equals("")) {
+									String state = genericBlockState.replace("%namespace%", identifier.getNamespace()).replace("%block%", identifier.getPath());
+									
+									String item = blockItemModel.replace("%namespace%",identifier.getNamespace()).replace("%block%",identifier.getPath());
+									
+									clientBlockJsons.add(BiProvider.of(
+											new NoValidationIdentifier(identifier.getNamespace(), "blockstates/" + identifier.getPath() + ".json"),
+											state
+									));
+									
+									clientBlockJsons.add(BiProvider.of(
+											new NoValidationIdentifier(identifier.getNamespace(), "models/block/" + identifier.getPath() + ".json"),
+											model
+									));
+									
+									clientItemJsons.add(BiProvider.of(
+											new NoValidationIdentifier(identifier.getNamespace(), "models/item/" + identifier.getPath() + ".json"),
+											item
+									));
+									
+									for (String s : allTextures) {
+//										NoValidationIdentifier identifierTexture = new NoValidationIdentifier(identifier.getNamespace(), s);
+//
+//										File file = new File(pack.toString() + "/textures/"+packBlockFolder+"/" + identifierTexture.getPath() + ".png");
+//
+										System.out.println(s);
+										NoValidationIdentifier identifierTexture = new NoValidationIdentifier(identifier.getNamespace(), "textures/"+s+".png");
+										
+//										f = new File(
+//												"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+//														"/textures/" + identifierTexture.getPath() + ".png"
+//										);
+//
+//										if (!f.exists()) {
+//											f.getParentFile().mkdirs();
+//											f.createNewFile();
+//										}
+										
+										File file = new File(pack.toString() + "/" + identifierTexture.getPath());
+										
+										clientTextures.add(
+												BiProvider.of(
+														identifierTexture,
+														file
+												)
+										);
+									}
+									
+									if (outputPack) {
+										try {
+											File f = new File(
+													"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+															"/blockstates/" + identifier.getPath() + ".json"
+											);
+											
+											writeString(f, state);
+											
+											f = new File(
+													"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+															"/models/block/" + identifier.getPath() + ".json"
+											);
+											
+											writeString(f, model);
+											
+											f = new File(
+													"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+															"/models/item/" + identifier.getPath() + ".json"
+											);
+											
+											writeString(f, item);
+											
+											for (String s : allTextures) {
+												NoValidationIdentifier identifierTexture = new NoValidationIdentifier(identifier.getNamespace(), "textures/"+s+".png");
+												
+												f = new File(
+														"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+																"/textures/" + identifierTexture.getPath() + ".png"
+												);
+												
+												if (!f.exists()) {
+													f.getParentFile().mkdirs();
+													f.createNewFile();
+												}
+												
+												File file = new File(pack.toString() + "/textures/" + identifierTexture.getPath() + ".png");
+												
+												Files.copy(file, f);
+											}
+										} catch (Throwable ignored) {
+										}
+									}
+								}
+							}
+						} catch (Throwable err) {
+							err.printStackTrace();
+						}
+					});
+				} catch (Throwable err) {
+					err.printStackTrace();
 				}
 			}
 		}

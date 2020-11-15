@@ -13,9 +13,9 @@ public class BedrockMapper {
 	
 	static {
 		try {
-			InputStream streamItems = BedrockMapper.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/item_map.properties");
-			InputStream streamTabs = BedrockMapper.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/tab_map.properties");
-			InputStream streamSounds = BedrockMapper.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/sound_map.properties");
+			InputStream streamItems = BedrockMapper.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/mappings/item_map.properties");
+			InputStream streamTabs = BedrockMapper.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/mappings/tab_map.properties");
+			InputStream streamSounds = BedrockMapper.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/mappings/sound_map.properties");
 
 			assert streamItems != null;
 			assert streamTabs != null;

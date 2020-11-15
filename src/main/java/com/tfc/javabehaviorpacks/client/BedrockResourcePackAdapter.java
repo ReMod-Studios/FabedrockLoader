@@ -22,7 +22,7 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 	
 	@Override
 	public InputStream openRoot(String fileName) throws IOException {
-		icon = BedrockResourcePackAdapter.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/bedrock.png");
+		icon = BedrockResourcePackAdapter.class.getClassLoader().getResourceAsStream("assets/java-behavior-packs/builtin/bedrock.png");
 		return icon;
 	}
 	
@@ -32,6 +32,7 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 			HashMap<Identifier, String> jsons = new HashMap<>();
 			
 			JavaBehaviorPacks.clientItemJsons.forEach(provider -> jsons.put(new Identifier(provider.getT().toString().toLowerCase()), provider.getV()));
+			JavaBehaviorPacks.clientBlockJsons.forEach(provider -> jsons.put(new Identifier(provider.getT().toString().toLowerCase()), provider.getV()));
 			JavaBehaviorPacks.clientLangs.forEach(provider -> jsons.put(new Identifier(provider.getT().toString().toLowerCase()), provider.getV()));
 			
 			InputStream result = new ByteArrayInputStream(jsons.get(id).getBytes());
@@ -61,12 +62,13 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 		
 		ArrayList<Identifier> identifiers = new ArrayList<>();
 		JavaBehaviorPacks.clientItemJsons.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
+		JavaBehaviorPacks.clientBlockJsons.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
 		JavaBehaviorPacks.clientTextures.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
 		JavaBehaviorPacks.clientLangs.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
 		
-		System.out.println(
-				Arrays.deepToString(identifiers.toArray())
-		);
+//		System.out.println(
+//				Arrays.deepToString(identifiers.toArray())
+//		);
 		
 		return identifiers;
 //		return ImmutableSet.of();
@@ -77,6 +79,7 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 		ArrayList<Identifier> identifiers = new ArrayList<>();
 		
 		JavaBehaviorPacks.clientItemJsons.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
+		JavaBehaviorPacks.clientBlockJsons.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
 		JavaBehaviorPacks.clientTextures.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
 		JavaBehaviorPacks.clientLangs.forEach(provider -> identifiers.add(new Identifier(provider.getT().toString().toLowerCase())));
 
@@ -84,15 +87,19 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 //				Arrays.deepToString(identifiers.toArray())
 //		);
 
-//		if (id.toString().endsWith(".png")) {
-//			System.out.println(id);
-//			System.out.println(identifiers.contains(id));
-//			identifiers.forEach((identifier)->{
-//				if (identifier.toString().endsWith(".png")) {
-//					System.out.println(identifier);
-//				}
-//			});
-//		}
+		if (id.toString().endsWith(".json")) {
+			if (id.toString().contains("blockstates")) {
+				System.out.println(id);
+				System.out.println(identifiers.contains(id));
+				identifiers.forEach((identifier)->{
+					if (identifier.toString().contains("blockstates")) {
+						if (identifier.toString().endsWith(".json")) {
+							System.out.println(identifier);
+						}
+					}
+				});
+			}
+		}
 		
 		return identifiers.contains(id);
 	}

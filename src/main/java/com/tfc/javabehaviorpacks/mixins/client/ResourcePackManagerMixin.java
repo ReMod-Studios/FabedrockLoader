@@ -18,7 +18,7 @@ public class ResourcePackManagerMixin {
 		BedrockResourcePackAdapter adapter = new BedrockResourcePackAdapter();
 		consumer.accept(ResourcePackProfile.of(
 				"BedrockAssets", true, () -> adapter,
-				factory, ResourcePackProfile.InsertionPosition.TOP,
+				factory, ResourcePackProfile.InsertionPosition.BOTTOM,
 				ResourcePackSource.field_25347
 		));
 	}
