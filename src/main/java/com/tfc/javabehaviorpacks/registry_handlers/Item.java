@@ -5,14 +5,12 @@ import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.CreativeTabCache;
 import com.tfc.javabehaviorpacks.EnumFoodQuality;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
-import com.tfc.javabehaviorpacks.utils.assets_helpers.NoValidationIdentifier;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 
 import java.io.File;
 import java.util.Objects;
@@ -100,11 +98,11 @@ public class Item {
 			if (food != null) {
 				settings = settings.food(food.build());
 			}
+
+//			id = id.toLowerCase();
 			
-			id = id.toLowerCase();
-			
-			if (!JavaBehaviorPacks.namespaces.contains(new NoValidationIdentifier(id).getNamespace()))
-				JavaBehaviorPacks.namespaces.add(new NoValidationIdentifier(id).getNamespace());
+			if (!JavaBehaviorPacks.namespaces.contains(new Identifier(id).getNamespace()))
+				JavaBehaviorPacks.namespaces.add(new Identifier(id).getNamespace());
 			
 			final int finalUseTime = useTime;
 			boolean finalEnchantmentGlint = enchantmentGlint;
@@ -133,39 +131,39 @@ public class Item {
 //					}
 				}
 			};
-			if (Registry.ITEM.containsId(new NoValidationIdentifier(id))) {
-				try {
-					Registry.register(Registry.ITEM, id, item1);
-				} catch (Throwable ignored) {
-					Registry.ITEM.set(
-							Registry.ITEM.getRawId(
-									Registry.ITEM.get(
-											new Identifier(id)
-									)
-							),
-							RegistryKey.of(
-									Registry.ITEM.getKey(),
-									new Identifier(id)
-							),
-							item1,
-							com.mojang.serialization.Lifecycle.stable()
-					);
-				}
-			} else {
-				Registry.ITEM.set(
-						Registry.ITEM.getRawId(
-								Registry.ITEM.get(
-										new Identifier(id)
-								)
-						),
-						RegistryKey.of(
-								Registry.ITEM.getKey(),
-								new Identifier(id)
-						),
-						item1,
-						com.mojang.serialization.Lifecycle.stable()
-				);
-			}
+//			if (Registry.ITEM.containsId(new Identifier(id))) {
+//				try {
+			Registry.register(Registry.ITEM, id, item1);
+//				} catch (Throwable ignored) {
+//					Registry.ITEM.set(
+//							Registry.ITEM.getRawId(
+//									Registry.ITEM.get(
+//											new Identifier(id)
+//									)
+//							),
+//							RegistryKey.of(
+//									Registry.ITEM.getKey(),
+//									new Identifier(id)
+//							),
+//							item1,
+//							com.mojang.serialization.Lifecycle.stable()
+//					);
+//				}
+//			} else {
+//				Registry.ITEM.set(
+//						Registry.ITEM.getRawId(
+//								Registry.ITEM.get(
+//										new Identifier(id)
+//								)
+//						),
+//						RegistryKey.of(
+//								Registry.ITEM.getKey(),
+//								new Identifier(id)
+//						),
+//						item1,
+//						com.mojang.serialization.Lifecycle.stable()
+//				);
+//			}
 		} catch (Throwable ignored) {
 			ignored.printStackTrace();
 		}
