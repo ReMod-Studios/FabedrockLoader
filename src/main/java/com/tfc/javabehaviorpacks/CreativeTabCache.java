@@ -1,14 +1,7 @@
- m) {
-		 wait do blocks not exist client side in bedrockackage com.tfc.javabehaviorpacks;
-matodo; do 	v
-
-
-}
-
-
+package com.tfc.javabehaviorpacks;
 
 import com.tfc.javabehaviorpacks.utils.BiProvider;
-WorldMnimport com.tfc.javabehaviorpacks.utils.assets_helpers.BedrockMapper;
+import com.tfc.javabehaviorpacks.utils.assets_helpers.BedrockMapper;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemGroup;
@@ -22,7 +15,6 @@ import java.util.HashMap;
 
 public class CreativeTabCache {
 	public static final ItemGroup bedrockBlocks = FabricItemGroupBuilder.create(new Identifier("java_behaviorpacks:bedrock_blocks")).icon(() -> new ItemStack(Items.GRASS_BLOCK)).build();
-
 	public static final ItemGroup bedrockItems = FabricItemGroupBuilder.create(new Identifier("java_behaviorpacks:bedrock_items")).icon(() -> new ItemStack(Items.BLAZE_POWDER)).build();
 	
 	private static final HashMap<String, BiProvider<FabricItemGroupBuilder, ArrayList<String>>> groupHashMap = new HashMap<>();
@@ -32,16 +24,16 @@ public class CreativeTabCache {
 		try {
 			translationKey = translationKey.toLowerCase().substring(0, 1) + translationKey.substring(1);
 			
-			translationKey = ParentMapper.getMappedForTab(translationKey);
+			translationKey = BedrockMapper.getMappedForTab(translationKey);
 			
 			if (!groupHashMap.containsKey(translationKey)) {
 				if (translationKey.equals("items_tab") || translationKey.equals("blocks_tab")) {
 					return;
 				} else {
-					groupHashMap.put
-							(
+					groupHashMap.put(
 							translationKey,
-							BiProvider.									FabricItemGroupBuilder.create(new Identifier(
+							BiProvider.of(
+									FabricItemGroupBuilder.create(new Identifier(
 											"bedrock_tabs",
 											translationKey
 									)).icon(() -> new ItemStack(Items.BEDROCK)),
@@ -55,10 +47,9 @@ public class CreativeTabCache {
 			err.printStackTrace();
 		}
 	}
-
 	
 	public static void initTabs() {
-		((name, group) -> {
+		groupHashMap.forEach((name, group) -> {
 					builtGroupHashMap.put(
 							group.getT()
 //									.appendItems((list) -> {
@@ -73,8 +64,8 @@ public class CreativeTabCache {
 		);
 	}
 	
-	
-	public static ArrayList<ItemGroup> getGroupsFor(ItemStack stack) 	Identifier id = Registry.ITEM.getId(stack.getItem());
+	public static ArrayList<ItemGroup> getGroupsFor(ItemStack stack) {
+		Identifier id = Registry.ITEM.getId(stack.getItem());
 		ArrayList<ItemGroup> groups = new ArrayList<>();
 		
 		if (stack.getItem() instanceof BlockItem) groups.add(bedrockBlocks);
@@ -86,7 +77,7 @@ public class CreativeTabCache {
 						groups.add(tab);
 					}
 				}
-				
-				
-
+		);
+		return groups;
+	}
 }
