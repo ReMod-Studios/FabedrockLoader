@@ -24,23 +24,25 @@ public class CreativeTabCache {
 		try {
 			translationKey = translationKey.toLowerCase().substring(0, 1) + translationKey.substring(1);
 			
+			translationKey = ParentMapper.getMappedForTab(translationKey);
+			
 			if (!groupHashMap.containsKey(translationKey)) {
-				if (translationKey.equals("Items") || translationKey.equals("Blocks")) {
+				if (translationKey.equals("items_tab") || translationKey.equals("blocks_tab")) {
 					return;
 				} else {
 					groupHashMap.put(
-							ParentMapper.getMappedForTab(translationKey),
+							translationKey,
 							BiProvider.of(
 									FabricItemGroupBuilder.create(new Identifier(
 											"bedrock_tabs",
-											ParentMapper.getMappedForTab(translationKey)
+											translationKey
 									)).icon(() -> new ItemStack(Items.BEDROCK)),
 									new ArrayList<>())
 					);
 				}
 			}
 			
-			groupHashMap.get(ParentMapper.getMappedForTab(translationKey)).getV().add(id);
+			groupHashMap.get(translationKey).getV().add(id);
 		} catch (Throwable err) {
 			err.printStackTrace();
 		}

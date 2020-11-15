@@ -13,6 +13,7 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -119,7 +120,10 @@ public class Item {
 				
 				@Override
 				protected boolean isIn(ItemGroup group) {
-					if (CreativeTabCache.getGroupsFor(new ItemStack(this)).contains(group)) return true;
+//					if (CreativeTabCache.getGroupsFor(new ItemStack(this)).contains(group)) return true;
+					ArrayList<ItemGroup> groups = CreativeTabCache.getGroupsFor(new ItemStack(this));
+					if (groups.contains(group)) return true;
+					for (ItemGroup group1 : groups) if (group.getName().equals(group1.getName())) return true;
 					return super.isIn(group);
 				}
 				
