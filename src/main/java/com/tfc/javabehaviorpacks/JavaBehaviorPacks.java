@@ -2,6 +2,7 @@ package com.tfc.javabehaviorpacks;
 
 import com.google.common.io.Files;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.registry_handlers.Block;
@@ -16,6 +17,7 @@ import net.minecraft.server.MinecraftServer;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class JavaBehaviorPacks implements ModInitializer {
@@ -25,6 +27,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 	private static final String templateCubeTBS;
 	private static final String genericBlockState;
 	private static final String blockItemModel;
+	private static ArrayList<File> tickFuncs = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientItemJsons = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientBlockJsons = new ArrayList<>();
 	public static ArrayList<BiProvider<NoValidationIdentifier, String>> clientLangs = new ArrayList<>();
@@ -78,6 +81,38 @@ public class JavaBehaviorPacks implements ModInitializer {
 		return output;
 	}
 	
+	public static String[] getAllTickFuncs() {
+		ArrayList<String> allFuncs = new ArrayList<>();
+		Gson gson = new Gson();
+		HashMap<String, File> allFiles = new HashMap<>();
+
+		for (BiProvider<String,File> biProvider : serverMcFuncs) allFiles.put(biProvider.getT(),biProvider.getV());
+
+		for (File f : tickFuncs) {
+			try {
+				FileInputStream stream = new FileInputStream(f);
+				JsonObject object = gson.fromJson(readStream(stream),JsonObject.class);
+				stream.close();
+				JsonArray array = object.getAsJsonArray("values");
+				
+				for (int i = 0; i < array.size(); i++) {
+					String func =
+									"\\functions\\" +
+											array.get(i).getAsString().replace("\"","") +
+											".mcfunction";
+					FileInputStream stream1 = new FileInputStream(
+							allFiles.get(func)
+					);
+					allFuncs.add(readStream(stream1));
+					stream1.close();
+				}
+			} catch (Throwable ignored) {
+				ignored.printStackTrace();
+			}
+		}
+		return allFuncs.toArray(new String[0]);
+	}
+	
 	public void getAllFiles(File f, ArrayList<File> list) {
 		for (File f1 : f.listFiles()) {
 			if (f1.isDirectory()) {
@@ -101,6 +136,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 	
 	@Override
 	public void onInitialize() {
+//		if (!GeckoLib.hasInitialized) GeckoLib.initialize();
 //		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
 //			dispatcher.register(
 //					CommandManager.literal("function_bedrock").executes(
@@ -117,9 +153,9 @@ public class JavaBehaviorPacks implements ModInitializer {
 		CommandUpdater.main(new String[0]);
 		
 		File bevPacks = new File("behavior_packs");
-		if (!bevPacks.exists()) {
+		if (!bevPacks.exists())
 			bevPacks.mkdirs();
-		}
+
 		StringBuilder packDiscriminatorText = new StringBuilder();
 		
 		boolean outputPack = false;
@@ -150,7 +186,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 			
 			if (outputPack) {
 				File f = new File(
-						"bedrock_resource_pack/assets/" + ("behaviorpack_base") + "/" +
+						"bedrock_pack/assets/" + ("behaviorpack_base") + "/" +
 								"lang/" + "en_US.lang".toLowerCase().replace(".lang", ".json")
 				);
 				writeString(f, lang);
@@ -161,7 +197,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 		
 		if (outputPack) {
 			try {
-				File packMcMeta = new File("bedrock_resource_pack/pack.mcmeta");
+				File packMcMeta = new File("bedrock_pack/pack.mcmeta");
 				writeString(packMcMeta, "{\n" +
 						"   \"pack\": {\n" +
 						"      \"pack_format\": 6,\n" +
@@ -195,24 +231,29 @@ public class JavaBehaviorPacks implements ModInitializer {
 							for (File item : allItems) {
 								Item.register(item);
 							}
-						}
-						if (resource.getName().equals("blocks")) {
+						} else if (resource.getName().equals("blocks")) {
 							ArrayList<File> allBlocks = new ArrayList<>();
 							getAllFiles(resource, allBlocks);
 							for (File item : allBlocks) {
 								Block.register(item);
 							}
-						}
-						if (resource.getName().equals("functions")) {
+						} else if (resource.getName().equals("functions")) {
 							ArrayList<File> allFuncs = new ArrayList<>();
 							getAllFiles(resource, allFuncs);
 							for (File item : allFuncs) {
 								if (item.getName().endsWith(".mcfunction")) {
 									serverMcFuncs.add(BiProvider.of(item.getPath().substring(pack.getPath().length()),item));
+								} else {
+									if (item.getName().equals("tick.json")) {
+										tickFuncs.add(item);
+									}
+								}
+								//TODO
+								if (outputPack) {
+									File f = new File("bedrock_pack/data/functions/");
 								}
 							}
-						}
-						if (resource.getName().equals("jbp-client")) {
+						} else if (resource.getName().equals("jbp-client")) {
 							try {
 								handleClient(pack, outputPack, packDiscriminatorText);
 							} catch (Throwable ignored) {
@@ -268,7 +309,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 						langFile.append("\t\"\":\"\"\n" + "}");
 						
 						File f = new File(
-								"bedrock_resource_pack/assets/" + ("bedrock" + packDiscriminatorText) + "/" +
+								"bedrock_pack/assets/" + ("bedrock" + packDiscriminatorText) + "/" +
 										"lang/" + lang.getName().toLowerCase().replace(".lang", ".json")
 						);
 						
@@ -354,7 +395,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 					);
 					
 					File f = new File(
-							"bedrock_resource_pack/assets/" +
+							"bedrock_pack/assets/" +
 									identifier.toString().replace(":", "/")
 					);
 					
@@ -381,7 +422,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 					);
 
 					f = new File(
-							"bedrock_resource_pack/assets/" +
+							"bedrock_pack/assets/" +
 									"/" + texture1.replace(":", "/") + ".png"
 					);
 
@@ -489,7 +530,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 										NoValidationIdentifier identifierTexture = new NoValidationIdentifier(identifier.getNamespace(), "textures/"+s+".png");
 										
 //										f = new File(
-//												"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+//												"bedrock_pack/assets/" + identifier.getNamespace() +
 //														"/textures/" + identifierTexture.getPath() + ".png"
 //										);
 //
@@ -511,21 +552,21 @@ public class JavaBehaviorPacks implements ModInitializer {
 									if (outputPack) {
 										try {
 											File f = new File(
-													"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+													"bedrock_pack/assets/" + identifier.getNamespace() +
 															"/blockstates/" + identifier.getPath() + ".json"
 											);
 											
 											writeString(f, state);
 											
 											f = new File(
-													"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+													"bedrock_pack/assets/" + identifier.getNamespace() +
 															"/models/block/" + identifier.getPath() + ".json"
 											);
 											
 											writeString(f, model);
 											
 											f = new File(
-													"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+													"bedrock_pack/assets/" + identifier.getNamespace() +
 															"/models/item/" + identifier.getPath() + ".json"
 											);
 											
@@ -535,7 +576,7 @@ public class JavaBehaviorPacks implements ModInitializer {
 												NoValidationIdentifier identifierTexture = new NoValidationIdentifier(identifier.getNamespace(), "textures/"+s+".png");
 												
 												f = new File(
-														"bedrock_resource_pack/assets/" + identifier.getNamespace() +
+														"bedrock_pack/assets/" + identifier.getNamespace() +
 																"/textures/" + identifierTexture.getPath() + ".png"
 												);
 												

@@ -1,11 +1,10 @@
 package com.tfc.javabehaviorpacks.mixins.server;
 
-import com.tfc.javabehaviorpacks.utils.McFunctionExecutor;
+import com.tfc.javabehaviorpacks.server.McFunctionExecutor;
 import net.minecraft.network.NetworkThreadUtils;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;

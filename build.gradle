@@ -1,7 +1,19 @@
+//buildscript {
+//    repositories {
+//        jcenter()
+//        mavenCentral()
+//    }
+//    dependencies {
+//        classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+//    }
+//}
+
 plugins {
     id 'fabric-loom' version '0.5-SNAPSHOT'
     id 'maven-publish'
 }
+apply plugin: 'java'
+//apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -14,6 +26,18 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+repositories {
+    maven { url 'https://repo.repsy.io/mvn/fadookie/particleman' }
+    maven { url 'https://maven.enginehub.org/repo/' }
+    maven { url 'https://repo.repsy.io/mvn/gandiber/geckolib' }
+    jcenter()
+    mavenCentral()
+}
+
+//configurations {
+//    shade
+//}
+
 dependencies {
     //to change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -22,6 +46,16 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+//    modImplementation 'software.bernie.geckolib:fabric-1.16.4-geckolib:3.0.0:dev'
+
+//    compile 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
+
+//    shade 'com.eliotlash.molang:molang:SNAPSHOT.12'
+//    shade 'com.eliotlash.mclib:mclib:SNAPSHOT.12'
+    implementation 'com.eliotlash.molang:molang:SNAPSHOT.12'
+    implementation 'com.eliotlash.mclib:mclib:SNAPSHOT.12'
+//    compile 'com.github.jengelman.gradle.plugins:shadow:4.0.4'
 
     // https://mvnrepository.com/artifact/org.json/json
 //    compile group: 'org.json', name: 'json', version: '20200518'
@@ -92,3 +126,14 @@ publishing {
 //        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
 //    }
 //}
+
+//shadowJar {
+//    configurations = [project.configurations.shade]
+//    from sourceSets.main.allSource
+//
+//    relocate 'com.eliotlash', 'software.bernie.shadowed.eliotlash'
+//    classifier ''
+//}
+//
+//jar.finalizedBy('shadowJar')
+//jar.finalizedBy('reobfJar')

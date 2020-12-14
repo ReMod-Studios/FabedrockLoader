@@ -4,7 +4,7 @@
   "package": "com.tfc.javabehaviorpacks.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "server.ServerStart",
+    "server.ServerMixin",
     "server.Chat"
   ],
   "client": [

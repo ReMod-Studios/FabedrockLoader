@@ -1,25 +1,32 @@
 package com.tfc.javabehaviorpacks.registry_handlers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.tfc.javabehaviorpacks.CreativeTabCache;
 import com.tfc.javabehaviorpacks.EnumFoodQuality;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
+import com.tfc.javabehaviorpacks.utils.assets_helpers.BedrockMapper;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 //https://bedrock.dev/docs/stable/Item
 public class Item {
 	public static void register(File item) {
+		String id = null;
 		try {
 			StringBuilder s = new StringBuilder();
 			Scanner sc = new Scanner(item);
@@ -57,6 +64,8 @@ public class Item {
 			
 			JsonObject itemObj = object.getAsJsonObject("minecraft:item");
 			
+			HashMap<String,Float> blockBreakSpeedAmplifiers = new HashMap<>();
+			
 			if (itemObj.has("components")) {
 				JsonObject components = itemObj.getAsJsonObject("components");
 				if (components.has("minecraft:max_stack_size")) {
@@ -88,11 +97,28 @@ public class Item {
 						}
 					}
 				}
+				
+				if (components.has("minecraft:digger")) {
+					JsonArray digger = components.getAsJsonObject("minecraft:digger").getAsJsonArray("destroy_speeds");
+					if (digger != null) {
+						digger.iterator().forEachRemaining((speedElement)->{
+							JsonObject element = speedElement.getAsJsonObject();
+							String nameOrQuery;
+							try {
+								nameOrQuery = element.getAsJsonPrimitive("block").getAsString();
+							} catch (Throwable ignored) {
+								nameOrQuery = element.getAsJsonObject("block").getAsJsonPrimitive("tags").getAsString();
+							}
+							float speed = element.getAsJsonPrimitive("speed").getAsFloat();
+							blockBreakSpeedAmplifiers.put(nameOrQuery,speed);
+						});
+					}
+				}
 			}
 			
-			String id = itemObj.getAsJsonObject("description").getAsJsonPrimitive("identifier").getAsString();
+			id = itemObj.getAsJsonObject("description").getAsJsonPrimitive("identifier").getAsString();
 			
-			System.out.println(id);
+//			System.out.println(id);
 			
 			net.minecraft.item.Item.Settings settings = new net.minecraft.item.Item.Settings().maxCount(maxStack);
 			
@@ -134,6 +160,35 @@ public class Item {
 //						stacks.add(new ItemStack(this));
 //					}
 				}
+				
+				@Override
+				public float getMiningSpeedMultiplier(ItemStack stack, BlockState state) {
+					Identifier id = Registry.BLOCK.getKey(state.getBlock()).get().getValue();
+					if (blockBreakSpeedAmplifiers.containsKey(id.toString()))
+						return blockBreakSpeedAmplifiers.get(id.toString());
+					
+					AtomicReference<Float> speed = new AtomicReference<>(super.getMiningSpeedMultiplier(stack,state));
+					
+					blockBreakSpeedAmplifiers.forEach((name, val) -> {
+						try {
+							if (!name.startsWith("q.any_tag(")) return;
+							String allTags = name.substring("q.any_tag(".length(), name.length() - 1);
+							for (String s : allTags.split(",")) {
+								s = s.trim().substring(1, s.trim().length() - 1);
+								ArrayList<String> alLTags = BedrockMapper.getAllTags(s);
+								for (String tagName : alLTags) {
+									if (state.getBlock().isIn(BlockTags.getTagGroup().getTagOrEmpty(new Identifier(tagName)))) {
+										speed.set(val);
+										return;
+									}
+								}
+							}
+						} catch (Throwable ignored) {
+						}
+					});
+					
+					return speed.get();
+				}
 			};
 //			if (Registry.ITEM.containsId(new Identifier(id))) {
 //				try {
@@ -169,6 +224,7 @@ public class Item {
 //				);
 //			}
 		} catch (Throwable ignored) {
+			System.out.println(id);
 			ignored.printStackTrace();
 		}
 	}

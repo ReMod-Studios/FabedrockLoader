@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import com.tfc.javabehaviorpacks.JavaBehaviorPacks;
+import com.tfc.javabehaviorpacks.server.McFunctionExecutor;
 import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.resource.ServerResourceManager;
 import net.minecraft.server.MinecraftServer;
@@ -18,11 +19,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.Proxy;
+import java.util.function.BooleanSupplier;
 
 @Mixin(MinecraftServer.class)
-public abstract class ServerStart {
+public abstract class ServerMixin {
 	@Inject(at = @At("TAIL"), method = "<init>(Ljava/lang/Thread;Lnet/minecraft/util/registry/DynamicRegistryManager$Impl;Lnet/minecraft/world/level/storage/LevelStorage$Session;Lnet/minecraft/world/SaveProperties;Lnet/minecraft/resource/ResourcePackManager;Ljava/net/Proxy;Lcom/mojang/datafixers/DataFixer;Lnet/minecraft/resource/ServerResourceManager;Lcom/mojang/authlib/minecraft/MinecraftSessionService;Lcom/mojang/authlib/GameProfileRepository;Lnet/minecraft/util/UserCache;Lnet/minecraft/server/WorldGenerationProgressListenerFactory;)V")
 	public void construct(Thread thread, DynamicRegistryManager.Impl impl, LevelStorage.Session session, SaveProperties saveProperties, ResourcePackManager resourcePackManager, Proxy proxy, DataFixer dataFixer, ServerResourceManager serverResourceManager, MinecraftSessionService minecraftSessionService, GameProfileRepository gameProfileRepository, UserCache userCache, WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory, CallbackInfo ci) {
 		JavaBehaviorPacks.server = (MinecraftServer)(Object)this;
+	}
+	
+	@Inject(at = @At("TAIL"), method = "tick(Ljava/util/function/BooleanSupplier;)V")
+	public void tick(BooleanSupplier shouldKeepTicking, CallbackInfo ci) {
+		for (String s : JavaBehaviorPacks.getAllTickFuncs()) {
+			McFunctionExecutor.execute(s);
+		}
 	}
 }

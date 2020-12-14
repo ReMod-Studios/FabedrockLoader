@@ -87,19 +87,19 @@ public class BedrockResourcePackAdapter implements ResourcePack {
 //				Arrays.deepToString(identifiers.toArray())
 //		);
 
-		if (id.toString().endsWith(".json")) {
-			if (id.toString().contains("blockstates")) {
-				System.out.println(id);
-				System.out.println(identifiers.contains(id));
-				identifiers.forEach((identifier)->{
-					if (identifier.toString().contains("blockstates")) {
-						if (identifier.toString().endsWith(".json")) {
-							System.out.println(identifier);
-						}
-					}
-				});
-			}
-		}
+//		if (id.toString().endsWith(".json")) {
+//			if (id.toString().contains("blockstates")) {
+//				System.out.println(id);
+//				System.out.println(identifiers.contains(id));
+//				identifiers.forEach((identifier)->{
+//					if (identifier.toString().contains("blockstates")) {
+//						if (identifier.toString().endsWith(".json")) {
+//							System.out.println(identifier);
+//						}
+//					}
+//				});
+//			}
+//		}
 		
 		return identifiers.contains(id);
 	}
