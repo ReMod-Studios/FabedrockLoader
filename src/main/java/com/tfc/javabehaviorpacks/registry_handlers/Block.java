@@ -10,10 +10,13 @@ import com.tfc.javabehaviorpacks.server.McFunctionExecutor;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -21,6 +24,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -174,6 +178,38 @@ public class Block {
 									McFunctionExecutor.execute(s);
 								} else {
 									McFunctionExecutor.execute(s, entity);
+								}
+							}
+						}
+					}
+				}
+
+				@Override
+				public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack) {
+					super.onPlaced(world, pos, state, placer, itemStack);
+					if (finalCommandsStep.length != 0) {
+						if (!world.isClient) {
+							for (String s : finalCommandsStep) {
+								if (finalStepTarg.equals("self")) {
+									McFunctionExecutor.execute(s);
+								} else {
+									McFunctionExecutor.execute(s);
+								}
+							}
+						}
+					}
+				}
+
+				@Override
+				public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack stack) {
+					super.afterBreak(world, player, pos, state, blockEntity, stack);
+					if (finalCommandsStep.length != 0) {
+						if (!world.isClient) {
+							for (String s : finalCommandsStep) {
+								if (finalStepTarg.equals("self")) {
+									McFunctionExecutor.execute(s);
+								} else {
+									McFunctionExecutor.execute(s, player);
 								}
 							}
 						}
